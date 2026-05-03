@@ -3,17 +3,12 @@ from dotenv import load_dotenv
 
 import numpy as np
 
-import faiss
 import os
 
 load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=OPENAI_API_KEY)
-
-INDEX_FILE = "./data/leetcode.index"
-
-index = faiss.read_index(INDEX_FILE)
 
 NORMALIZATION_PROMPT = """
 Extract the core algorithmic problem from the below problem. 
@@ -40,15 +35,15 @@ def embed_input_problem(normalized_input: str):
 
     return np.array([response.data[0].embedding], dtype='float32')
 
-def faiss_search(query_vector, top_k):
+def faiss_search(query_vector, index, top_k):
     distances, indices = index.search(query_vector, top_k)
 
     return distances, indices
 
 
-def search_similar_problems(input_problem: str, top_k=5):
+def search_similar_problems(input_problem: str, index, top_k=5):
     normalized_problem = normalize_problem_statement(input_problem)
     query_vector = embed_input_problem(normalized_problem)
-    distances, indices = faiss_search(query_vector, top_k)
+    distances, indices = faiss_search(query_vector, index, top_k)
 
     return distances, indices
