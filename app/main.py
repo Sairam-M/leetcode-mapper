@@ -9,11 +9,34 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 import faiss
+import boto3
 import pandas as pd
+
+import os
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Download the index and dataframe from S3 on startup
+    s3 = boto3.client('s3', region_name='ap-south-2')
+
+    # Create data directory if it doesn't exist
+    os.makedirs('./data', exist_ok=True)
+
+    # Download the CSV file
+    s3.download_file(
+        Bucket='leetcode-mapper-data',
+        Key='leetcode_clean.csv', # Path in S3
+        Filename='./data/leetcode_clean.csv' # Local path to save
+    )
+
+    # Download the Index file
+    s3.download_file(
+        Bucket='leetcode-mapper-data',
+        Key='leetcode.index', # Path in S3
+        Filename='./data/leetcode.index' # Local path to save
+    )
+
     # runs once on startup
     app.state.index = faiss.read_index("./data/leetcode.index")
     app.state.df = pd.read_csv("./data/leetcode_clean.csv")
