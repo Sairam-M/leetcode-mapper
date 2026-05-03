@@ -46,4 +46,4 @@ def search_similar_problems(input_problem: str, index, top_k=5):
     query_vector = embed_input_problem(normalized_problem)
     distances, indices = faiss_search(query_vector, index, top_k)
 
-    return distances, indices
+    return normalized_problem, distances, indices
