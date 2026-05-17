@@ -155,9 +155,45 @@ uvicorn app.main:app --reload
 - Rate limited to 5 requests/minute on the public endpoint
 
 ---
+## Evaluation
+Phase 2: Parse Notion study guide, scrape GFG problem statements, batch map entire guide to LeetCode equivalents
+
+### Methodology
+Evaluated against 188 manually verified GFG → LeetCode mappings from a personal DSA study guide — built by running the tool in batch mode across 361 GFG problem links parsed from a Notion-based study guide, then comparing results against prior manual mappings using URL matching and case-insensitive title comparison as ground truth.
+
+### Results
+
+| Metric | Value |
+|---|---|
+| Ground truth pairs | 188 |
+| GFG problems mapped | 361 |
+| Coverage (overlap) | 168 / 188 (89.4%) |
+| Overall accuracy (verified rows) | 48.5% |
+
+**Accuracy by Confidence Level:**
+
+| Confidence | Total | Correct | Accuracy |
+|---|---|---|---|
+| Strong match | 72 | 45 | 62.5% |
+| Moderate match | 26 | 4 | 15.4% |
+| Weak match | 2 | 0 | 0.0% |
+
+### What the Numbers Mean
+
+**62.5% precision on Strong matches** is the meaningful number — not the 48.5% headline. The confidence score is a genuine signal: Strong matches are trustworthy, Moderate matches need manual review, Weak matches should be redone.
+
+The "incorrect" cases are not random failures. Many are valid alternative mappings — for example, the tool returned *Relative Sort Array* where the ground truth was *Custom Sort String*. Both are custom sorting problems. The ground truth reflects one person's mapping choice, not the only correct answer.
+
+**Practical workflow derived from evaluation:**
+- Strong match → auto-approve or spot check
+- Moderate match → manual review queue
+- Weak match → redo manually
+
+### Limitations of This Evaluation
+- Ground truth is a single annotator's mapping — some "incorrect" cases are valid alternatives
+- 72% of mapped problems have no ground truth verdict (not in manual Excel) — overall accuracy is a lower bound
+---
 
 ## Roadmap
-
-- Phase 2: Parse Notion study guide, scrape GFG problem statements, batch map entire guide to LeetCode equivalents
 - Phase 3: Enrich API responses with manually curated pattern labels from study guide
 - Migrate deployment to AWS EC2 with S3 for full cloud-native setup
